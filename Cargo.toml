@@ -1,0 +1,14 @@
+[package]
+name = "portable-mutex"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+
+[features]
+default = []
+
+# Fallback to spinlocks if OS is not supported
+fallback = []
+
+[build-dependencies]
+bindgen = "0.72.1"

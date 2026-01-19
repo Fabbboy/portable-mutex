@@ -11,7 +11,7 @@ This project is currently **under active development**. Despite its name suggest
 | Platform | x86 | x86_64 | ARM | ARM64 | RV32 | RV64 |
 | -------- | --- | ------ | --- | ----- | ---- | ---- |
 | Linux    | ✓   | ✓      | ✓   | ✓     | ✗    | ✗    |
-| Windows  | ✗   | ✗      | —   | ✗     | —    | —    |
+| Windows  | ✓   | ✓      | —   | ✓     | —    | —    |
 | FreeBSD  | ✗   | ✗      | ✗   | ✗     | ✗    | ✗    |
 | macOS    | —   | —      | —   | ✗     | —    | —    |
 

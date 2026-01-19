@@ -3,12 +3,7 @@ use std::{
   path::PathBuf,
 };
 
-#[cfg(any(
-  target_os = "linux",
-  target_os = "windows",
-  target_os = "freebsd",
-  target_os = "macos"
-))]
+#[cfg(any(target_os = "linux", target_os = "freebsd", target_os = "macos"))]
 mod constants {
   pub const OUT_DIR: &str = "OUT_DIR";
 
@@ -24,12 +19,7 @@ mod constants {
   }
 }
 
-#[cfg(any(
-  target_os = "linux",
-  target_os = "windows",
-  target_os = "freebsd",
-  target_os = "macos"
-))]
+#[cfg(any(target_os = "linux", target_os = "freebsd", target_os = "macos"))]
 mod imports {
   pub use bindgen::Builder;
 }
@@ -83,17 +73,6 @@ fn linux_headers(builder: imports::Builder, out: &PathBuf) {
 
 /*
 
-  Generate Windows-specific headers
-
-*/
-
-#[cfg(target_os = "windows")]
-fn windows_headers(_builder: imports::Builder, _out: &PathBuf) {
-  todo!("Implement Windows header generation");
-}
-
-/*
-
   Generate FreeBSD-specific headers
 
 */
@@ -129,9 +108,6 @@ fn main() {
 
     #[cfg(target_os = "linux")]
     linux_headers(builder, &out);
-
-    #[cfg(target_os = "windows")]
-    windows_headers(&builder, &out);
 
     #[cfg(target_os = "freebsd")]
     freebsd_headers(&builder, &out);

@@ -1,7 +1,10 @@
 #[cfg(target_os = "linux")]
-pub mod linux;
+mod linux;
 
-#[cfg(not(any(target_os = "linux")))]
+#[cfg(target_os = "windows")]
+mod windows;
+
+#[cfg(not(any(target_os = "linux", target_os = "windows")))]
 compile_error!("Futex is not implemented for this operating system");
 
 pub mod bindings;

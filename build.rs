@@ -18,14 +18,9 @@ mod constants {
   #[cfg(target_os = "linux")]
   pub mod linux {
     pub const FUTEX_HEADER: &str = "/usr/include/linux/futex.h";
+    pub const UNISTD_HEADER: &str = "/usr/include/asm/unistd.h";
     pub const FUTEX_TARGET: &str = "linux_futex_bindings.rs";
     pub const UNISTD_TARGET: &str = "linux_unistd_bindings.rs";
-
-    #[cfg(target_arch = "x86_64")]
-    pub const UNISTD_HEADER: &str = "/usr/include/asm/unistd_64.h";
-
-    #[cfg(target_arch = "x86")]
-    pub const UNISTD_HEADER: &str = "/usr/include/asm/unistd_32.h";
   }
 }
 

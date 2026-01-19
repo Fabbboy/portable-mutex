@@ -32,10 +32,3 @@ let mutex = Mutex::new(0);
 let mut guard = mutex.lock();
 *guard += 1;
 ```
-
-## Building
-
-```bash
-# Build (Linux x86/x86_64 only for now)
-cargo build
-```

@@ -1,6 +1,3 @@
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-mod x86_64;
-
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 compile_error!("Futex wait is not implemented for this architecture");
 
@@ -9,111 +6,127 @@ pub struct Futex;
 impl Futex {
   #[inline(always)]
   #[cfg(target_arch = "x86")]
-  pub unsafe fn wait32(curr: *const u32, expected: u32) -> isize {
+  pub unsafe fn wait_x86_32(curr: *const u32, expected: u32) -> isize {
     use crate::futex::bindings::{
       __NR_futex as SYS_futex,
       FUTEX_WAIT,
     };
 
+    let ret: isize;
     unsafe {
-      x86_64::syscall6(
-        SYS_futex as isize,
-        curr as usize,
-        FUTEX_WAIT as usize,
-        expected as usize,
-        0,
-        0,
-        0,
-      )
+      core::arch::asm!(
+        "int 0x80",
+        inlateout("eax") SYS_futex as isize => ret,
+        in("ebx") curr as usize,
+        in("ecx") FUTEX_WAIT as usize,
+        in("edx") expected as usize,
+        in("esi") 0,
+        in("edi") 0,
+        in("ebp") 0,
+        options(nostack),
+      );
     }
+    ret
   }
 
   #[inline(always)]
   #[cfg(target_arch = "x86_64")]
-  pub unsafe fn wait64(curr: *const u32, expected: u32) -> isize {
+  pub unsafe fn wait_x86_64(curr: *const u32, expected: u32) -> isize {
     use crate::futex::bindings::{
       __NR_futex as SYS_futex,
       FUTEX_WAIT,
     };
 
+    let ret: isize;
     unsafe {
-      x86_64::syscall6(
-        SYS_futex as isize,
-        curr as usize,
-        FUTEX_WAIT as usize,
-        expected as usize,
-        0,
-        0,
-        0,
-      )
+      core::arch::asm!(
+        "syscall",
+        inlateout("rax") SYS_futex as isize => ret,
+        in("rdi") curr as usize,
+        in("rsi") FUTEX_WAIT as usize,
+        in("rdx") expected as usize,
+        in("r10") 0,
+        in("r8") 0,
+        in("r9") 0,
+        clobber_abi("sysv64"),
+      );
     }
+    ret
   }
 
   #[inline(always)]
   pub unsafe fn wait(curr: *const u32, expected: u32) -> isize {
     #[cfg(target_arch = "x86")]
     {
-      unsafe { Self::wait32(curr, expected) }
+      unsafe { Self::wait_x86_32(curr, expected) }
     }
 
     #[cfg(target_arch = "x86_64")]
     {
-      unsafe { Self::wait64(curr, expected) }
+      unsafe { Self::wait_x86_64(curr, expected) }
     }
   }
 
   #[inline(always)]
   #[cfg(target_arch = "x86")]
-  pub unsafe fn wake32(curr: *const u32, waiters: usize) -> isize {
+  pub unsafe fn wake_x86_32(curr: *const u32, waiters: usize) -> isize {
     use crate::futex::bindings::{
       __NR_futex as SYS_futex,
       FUTEX_WAKE,
     };
 
+    let ret: isize;
     unsafe {
-      x86_64::syscall6(
-        SYS_futex as isize,
-        curr as usize,
-        FUTEX_WAKE as usize,
-        waiters,
-        0,
-        0,
-        0,
-      )
+      core::arch::asm!(
+        "int 0x80",
+        inlateout("eax") SYS_futex as isize => ret,
+        in("ebx") curr as usize,
+        in("ecx") FUTEX_WAKE as usize,
+        in("edx") waiters,
+        in("esi") 0,
+        in("edi") 0,
+        in("ebp") 0,
+        options(nostack),
+      );
     }
+    ret
   }
 
   #[inline(always)]
   #[cfg(target_arch = "x86_64")]
-  pub unsafe fn wake64(curr: *const u32, waiters: usize) -> isize {
+  pub unsafe fn wake_x86_64(curr: *const u32, waiters: usize) -> isize {
     use crate::futex::bindings::{
       __NR_futex as SYS_futex,
       FUTEX_WAKE,
     };
 
+    let ret: isize;
     unsafe {
-      x86_64::syscall6(
-        SYS_futex as isize,
-        curr as usize,
-        FUTEX_WAKE as usize,
-        waiters,
-        0,
-        0,
-        0,
-      )
+      core::arch::asm!(
+        "syscall",
+        inlateout("rax") SYS_futex as isize => ret,
+        in("rdi") curr as usize,
+        in("rsi") FUTEX_WAKE as usize,
+        in("rdx") waiters,
+        in("r10") 0,
+        in("r8") 0,
+        in("r9") 0,
+        clobber_abi("sysv64"),
+      );
     }
+    ret
   }
 
   #[inline(always)]
   pub unsafe fn wake(curr: *const u32, waiters: usize) -> isize {
     #[cfg(target_arch = "x86")]
     {
-      unsafe { Self::wake32(curr, waiters) }
+      unsafe { Self::wake_x86_32(curr, waiters) }
     }
 
     #[cfg(target_arch = "x86_64")]
     {
-      unsafe { Self::wake64(curr, waiters) }
+      unsafe { Self::wake_x86_64(curr, waiters) }
     }
   }
 }

@@ -1,118 +1,108 @@
-use std::{
-  env,
-  path::PathBuf,
-};
+use std::env;
 
-#[cfg(any(target_os = "linux", target_os = "freebsd", target_os = "macos"))]
-mod constants {
-  pub const OUT_DIR: &str = "OUT_DIR";
+#[cfg(not(target_os = "windows"))]
+mod generator {
+  use std::{
+    env,
+    path::PathBuf,
+  };
 
-  pub const UNABLE_TO_GENERATE: &str = "Unable to generate bindings";
-  pub const UNABLE_TO_WRITE: &str = "Unable to write bindings to file";
+  use bindgen::Builder;
+
+  const OUT_DIR: &str = "OUT_DIR";
+  const UNABLE_TO_GENERATE: &str = "Unable to generate bindings";
+  const UNABLE_TO_WRITE: &str = "Unable to write bindings to file";
 
   #[cfg(target_os = "linux")]
-  pub mod linux {
+  mod linux {
     pub const FUTEX_HEADER: &str = "/usr/include/linux/futex.h";
     pub const UNISTD_HEADER: &str = "/usr/include/asm/unistd.h";
     pub const FUTEX_TARGET: &str = "linux_futex_bindings.rs";
     pub const UNISTD_TARGET: &str = "linux_unistd_bindings.rs";
   }
-}
 
-#[cfg(any(target_os = "linux", target_os = "freebsd", target_os = "macos"))]
-mod imports {
-  pub use bindgen::Builder;
-}
+  /*
 
-/*
+    Generate Linux-specific headers
 
-  Generate Linux-specific headers
+  */
+  #[cfg(target_os = "linux")]
+  pub fn linux_headers(out: &PathBuf) {
+    let builder = Builder::default().use_core();
 
-*/
-#[cfg(target_os = "linux")]
-fn linux_unistd_headers(builder: imports::Builder, out: &PathBuf) {
-  let unistd_binds = builder
-    .header(constants::linux::UNISTD_HEADER)
-    .generate()
-    .expect(constants::UNABLE_TO_GENERATE);
+    let unistd_binds = builder
+      .clone()
+      .header(linux::UNISTD_HEADER)
+      .generate()
+      .expect(UNABLE_TO_GENERATE);
 
-  let out_path = out.join(constants::linux::UNISTD_TARGET);
-  unistd_binds
-    .write_to_file(&out_path)
-    .expect(constants::UNABLE_TO_WRITE);
+    let out_path = out.join(linux::UNISTD_TARGET);
+    unistd_binds
+      .write_to_file(&out_path)
+      .expect(UNABLE_TO_WRITE);
 
-  println!(
-    "cargo:rustc-env=LINUX_UNISTD_BINDINGS={}",
-    out_path.display()
-  );
-}
+    println!(
+      "cargo:rustc-env=LINUX_UNISTD_BINDINGS={}",
+      out_path.display()
+    );
 
-#[cfg(target_os = "linux")]
-fn linux_futex_headers(builder: imports::Builder, out: &PathBuf) {
-  let futex_binds = builder
-    .header(constants::linux::FUTEX_HEADER)
-    .generate()
-    .expect(constants::UNABLE_TO_GENERATE);
+    let futex_binds = builder
+      .header(linux::FUTEX_HEADER)
+      .generate()
+      .expect(UNABLE_TO_GENERATE);
 
-  let out_path = out.join(constants::linux::FUTEX_TARGET);
-  futex_binds
-    .write_to_file(&out_path)
-    .expect(constants::UNABLE_TO_WRITE);
+    let out_path = out.join(linux::FUTEX_TARGET);
+    futex_binds.write_to_file(&out_path).expect(UNABLE_TO_WRITE);
 
-  println!(
-    "cargo:rustc-env=LINUX_FUTEX_BINDINGS={}",
-    out_path.display()
-  );
-}
+    println!(
+      "cargo:rustc-env=LINUX_FUTEX_BINDINGS={}",
+      out_path.display()
+    );
+  }
 
-#[cfg(target_os = "linux")]
-fn linux_headers(builder: imports::Builder, out: &PathBuf) {
-  linux_unistd_headers(builder.clone(), out);
-  linux_futex_headers(builder, out);
-}
+  /*
 
-/*
+    Generate FreeBSD-specific headers
 
-  Generate FreeBSD-specific headers
+  */
+  #[cfg(target_os = "freebsd")]
+  pub fn freebsd_headers(_out: &PathBuf) {
+    todo!("Implement FreeBSD header generation");
+  }
 
-*/
+  /*
 
-#[cfg(target_os = "freebsd")]
-fn freebsd_headers(_builder: imports::Builder, _out: &PathBuf) {
-  todo!("Implement FreeBSD header generation");
-}
+    Generate macOS-specific headers
 
-/*
+  */
+  #[cfg(target_os = "macos")]
+  pub fn macos_headers(_out: &PathBuf) {
+    todo!("Implement macOS header generation");
+  }
 
-  Generate macOS-specific headers
-
-*/
-
-#[cfg(target_os = "macos")]
-fn macos_headers(_builder: imports::Builder, _out: &PathBuf) {
-  todo!("Implement macOS header generation");
+  pub fn get_out_dir() -> PathBuf {
+    PathBuf::from(env::var(OUT_DIR).unwrap())
+  }
 }
 
 fn main() {
   println!("cargo:rerun-if-changed=build.rs");
 
-  #[cfg(any(
-    target_os = "linux",
-    target_os = "windows",
-    target_os = "freebsd",
-    target_os = "macos"
-  ))]
-  {
-    let out = PathBuf::from(env::var(constants::OUT_DIR).unwrap());
-    let builder = imports::Builder::default().use_core();
+  let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
 
-    #[cfg(target_os = "linux")]
-    linux_headers(builder, &out);
-
-    #[cfg(target_os = "freebsd")]
-    freebsd_headers(&builder, &out);
-
-    #[cfg(target_os = "macos")]
-    macos_headers(&builder, &out);
+  match target_os.as_str() {
+    "linux" => {
+      #[cfg(target_os = "linux")]
+      generator::linux_headers(&generator::get_out_dir());
+    }
+    "freebsd" => {
+      #[cfg(target_os = "freebsd")]
+      generator::freebsd_headers(&generator::get_out_dir());
+    }
+    "macos" => {
+      #[cfg(target_os = "macos")]
+      generator::macos_headers(&generator::get_out_dir());
+    }
+    _ => {}
   }
 }

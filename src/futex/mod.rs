@@ -17,12 +17,20 @@ impl Futex {
     {
       unsafe { linux::Futex::wait(curr, expected) }
     }
+    #[cfg(target_os = "windows")]
+    {
+      unsafe { windows::Futex::wait(curr, expected) }
+    }
   }
 
   pub unsafe fn wake(curr: *const u32, waiters: usize) -> isize {
     #[cfg(target_os = "linux")]
     {
       unsafe { linux::Futex::wake(curr, waiters) }
+    }
+    #[cfg(target_os = "windows")]
+    {
+      unsafe { windows::Futex::wake(curr, waiters) }
     }
   }
 }

@@ -55,6 +55,18 @@ impl Futex {
   }
 
   #[inline(always)]
+  #[cfg(target_arch = "arm")]
+  pub unsafe fn wait_arm32(_curr: *const u32, _expected: u32) -> isize {
+    todo!("Futex wait is not implemented for arm32 architecture");
+  }
+
+  #[inline(always)]
+  #[cfg(target_arch = "aarch64")]
+  pub unsafe fn wait_arm64(_curr: *const u32, _expected: u32) -> isize {
+    todo!("Futex wait is not implemented for arm64 architecture");
+  }
+
+  #[inline(always)]
   pub unsafe fn wait(curr: *const u32, expected: u32) -> isize {
     #[cfg(target_arch = "x86")]
     {
@@ -64,6 +76,16 @@ impl Futex {
     #[cfg(target_arch = "x86_64")]
     {
       unsafe { Self::wait_x86_64(curr, expected) }
+    }
+
+    #[cfg(target_arch = "arm")]
+    {
+      unsafe { Self::wait_arm32(curr, expected) }
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    {
+      unsafe { Self::wait_arm64(curr, expected) }
     }
   }
 
@@ -112,21 +134,42 @@ impl Futex {
         in("r8") 0,
         in("r9") 0,
         clobber_abi("sysv64"),
+        options(nostack),
       );
     }
     ret
   }
 
+  #[cfg(target_arch = "arm")]
+  pub unsafe fn wake_arm32(_curr: *const u32, _waiters: usize) -> isize {
+    todo!("Futex wake is not implemented for arm32 architecture");
+  }
+
+  #[cfg(target_arch = "aarch64")]
+  pub unsafe fn wake_arm64(_curr: *const u32, _waiters: usize) -> isize {
+    todo!("Futex wake is not implemented for arm64 architecture");
+  }
+
   #[inline(always)]
   pub unsafe fn wake(curr: *const u32, waiters: usize) -> isize {
     #[cfg(target_arch = "x86")]
-    {
-      unsafe { Self::wake_x86_32(curr, waiters) }
+    unsafe {
+      Self::wake_x86_32(curr, waiters)
     }
 
     #[cfg(target_arch = "x86_64")]
-    {
-      unsafe { Self::wake_x86_64(curr, waiters) }
+    unsafe {
+      Self::wake_x86_64(curr, waiters)
+    }
+
+    #[cfg(target_arch = "arm")]
+    unsafe {
+      Self::wake_arm32(curr, waiters)
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    unsafe {
+      Self::wake_arm64(curr, waiters)
     }
   }
 }

@@ -13,7 +13,7 @@ This project is currently **under active development**. Despite its name suggest
 | Linux    | ✓   | ✓      | ✓   | ✓     | ✗    | ✗    |
 | Windows  | ✗   | ✗      | —   | ✗     | —    | —    |
 | FreeBSD  | ✗   | ✗      | ✗   | ✗     | ✗    | ✗    |
-| macOS    | —   | ✗      | —   | ✗     | —    | —    |
+| macOS    | —   | —      | —   | ✗     | —    | —    |
 
 Backend implementations for Windows, FreeBSD, and macOS are planned but not yet written. Attempting to build on unsupported platforms will result in a compile-time error.
 

@@ -8,12 +8,12 @@ This project is currently **under active development**. Despite its name suggest
 
 ### Platform Support Status
 
-| Platform            | Status          |
-| ------------------- | --------------- |
-| Linux (x86, x86_64) | Implemented     |
-| Windows             | Not implemented |
-| FreeBSD             | Not implemented |
-| macOS               | Not implemented |
+| Platform | x86 | x86_64 | ARM | ARM64 | RV32 | RV64 |
+| -------- | --- | ------ | --- | ----- | ---- | ---- |
+| Linux    | ✓   | ✓      | ✓   | ✓     | ✗    | ✗    |
+| Windows  | ✗   | ✗      | —   | ✗     | —    | —    |
+| FreeBSD  | ✗   | ✗      | ✗   | ✗     | ✗    | ✗    |
+| macOS    | —   | ✗      | —   | ✗     | —    | —    |
 
 Backend implementations for Windows, FreeBSD, and macOS are planned but not yet written. Attempting to build on unsupported platforms will result in a compile-time error.
 
